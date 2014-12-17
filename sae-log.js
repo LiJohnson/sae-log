@@ -57,9 +57,9 @@ var cmd = {
 		fs.readFile(extract+logFileName,{encoding:'utf-8'},function(err,data){
 			if(err)return;
 
-			var ips = data.match(/(\d+\.){3}\d+/g) ||[];
-			fs.writeFile("ip.data",JSON.stringify(ips),function(){
-				
+			var ips = data.match(/\s(\d+\.){3}\d+\s/g) ||[];
+			fs.writeFile("ip.data","ips='"+ips.join(",").replace(/\s/g,'')+"'.split(',')",function(){
+
 			});
 		});
 	},

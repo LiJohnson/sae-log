@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>ip</title>
+	<script src="ip.data" ></script>
+	<script src="node_modules/jquery/dist/jquery.js" ></script>
+	<script src="node_modules/bootstrap/dist/js/bootstrap.js" ></script>
+	<link rel="stylesheet" type="text/css" href="node_modules/bootstrap/dist/css/bootstrap.css">
+	<script>
+	$(function(){
+		var ipData = {};
+		$.each(ips, function(i,ip) {
+			ipData[ip]=false;
+		});
+
+		$.each(ipData, function(ip) {
+			if(sessionStorage[ip]){
+				ipData[ip] = JSON.parse(sessionStorage[ip]);
+			}else{
+				$.get("http://ipinfo.io/#/json".replace("#",ip),function(data){
+					sessionStorage[ip] = JSON.stringify(data);
+					ipData[ip] = data;
+				},'json');
+
+			}
+		});
+		var print = function(list){
+			var $table = $("table").empty();
+			var ip = [];
+			$.each(list,function(i,data) {
+				ip.push(data.ip);
+				var tr = "<tr>";
+				tr += "<td>"+data.ip+"</td>";
+				tr += "<td>" + JSON.stringify(data) + "</td>";
+				tr += "<td><a href='https://www.google.com.hk/maps/place/"+data.loc+"' target=_blank >loc</a></td>";
+				tr += "</tr>";
+				$table.append(tr); 
+			});
+			$table.append("<tr><td colspan=3 >"+ip.join(",")+"</td></tr>");
+		};
+		$("form").submit(function(){
+			var list = [];
+			var ip = $(this).find("[name=ip]").val();
+			var city = $(this).find("[name=city]").val();
+
+			$.each(ipData,function(_ip,data){
+				if(ip && _ip.indexOf(ip) != -1){
+					list.push(data);
+				}else if( city && (data.hostname + data.city + data.region).indexOf(city) != -1 ) {
+					list.push(data);
+				}
+			});
+
+			print(list);
+			return false;
+		}).submit(function(){return false});
+	});
+	</script>
+</head>
+<body>
+<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<form class="form form-inline" >
+					<input type="text" class="form-control col-md-5" name="ip"/>
+					<input type="text" class="form-control col-md-5" name="city"/>
+					<input type="submit" class="btn btn-default"> 
+				</form>
+			</div>
+		</div>
+		<div class="row" >
+			<table class='table table-border table-hovered' ></table>
+		</div>
+	</div>
+
+</body>
+</html>
